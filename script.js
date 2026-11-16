@@ -316,18 +316,14 @@
     canvas.height = height;
     const context = canvas.getContext('2d');
     const stream = canvas.captureStream(30);
-    const sourceStream = (input.captureStream || input.mozCaptureStream).call(input);
-    const audioTracks = sourceStream.getAudioTracks ? sourceStream.getAudioTracks() : [];
-    audioTracks.forEach((track) => stream.addTrack(track));
     const chunks = [];
     let recorder;
     try { recorder = new MediaRecorder(stream, { mimeType }); }
     catch (error) {
       stream.getTracks().forEach((track) => track.stop());
-      sourceStream.getTracks().forEach((track) => track.stop());
       throw new Error(`Не удалось запустить MediaRecorder: ${error.message}`);
     }
-    state.video = { recorder, stream, sourceStream };
+    state.video = { recorder, stream, sourceStream: null };
     const completion = new Promise((resolve, reject) => {
       recorder.ondataavailable = (event) => { if (event.data && event.data.size) chunks.push(event.data); };
       recorder.onerror = () => reject(new Error('Ошибка при записи видео.'));
@@ -350,7 +346,13 @@
       recorder.start(250);
       await input.play();
       await new Promise((resolve, reject) => {
-        const stop = () => { if (recorder.state !== 'inactive') recorder.stop(); resolve(); };
+        let finished = false;
+        const stop = () => {
+          if (finished) return;
+          finished = true;
+          if (recorder.state !== 'inactive') recorder.stop();
+          resolve();
+        };
         input.addEventListener('ended', stop, { once: true });
         input.addEventListener('error', () => reject(new Error('Ошибка воспроизведения видео.')), { once: true });
         const tick = () => {
@@ -372,7 +374,6 @@
     } finally {
       input.pause();
       stream.getTracks().forEach((track) => track.stop());
-      sourceStream.getTracks().forEach((track) => track.stop());
       state.video = null;
     }
   }

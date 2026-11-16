@@ -231,6 +231,26 @@ footer a:hover { color: var(--brand-blue); text-decoration: underline; }
   border-width: 0 2px 2px 0;
   transform: rotate(45deg);
 }
+
+.rail-message {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  color: #fff;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 48px;
+  font-weight: 700;
+  line-height: 1;
+  white-space: nowrap;
+  transform: translate(-50%, -50%) rotate(-90deg);
+  pointer-events: none;
+}
+.footer-links { display: flex; flex-direction: column; align-items: flex-end; gap: 5px; }
+footer a { color: #c6c6c6; font-size: clamp(48px, 6vw, 82px); }
+footer a:last-child { font-size: clamp(15px, 1.7vw, 25px); }
 @media (max-width: 767px) {
-  .side-button { min-width: 0; }
+  .rail-message { font-size: 48px; transform: translate(-50%, -50%); }
+  .footer-links { align-items: center; }
+  footer a { font-size: clamp(42px, 10vw, 64px); }
+  footer a:last-child { font-size: clamp(14px, 4vw, 21px); }
 }
